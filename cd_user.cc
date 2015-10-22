@@ -16,8 +16,15 @@ void cd_user::destroy() {
   std::cout << "cd_user destroy called" << std::endl;
 
   auto self(std::dynamic_pointer_cast<cd_user>(shared_from_this()));
-  cd_user_md::instance().disconnected(self);
 
+  boost::system::error_code ec;
+  socket_.shutdown(boost::asio::socket_base::shutdown_both, ec);
+  socket_.close(ec);
+
+  bool r = cd_user_md::instance().disconnected(self);
+  if(r) {
+    std::cout << "[debug] 유저 삭제에 관련해서 나머지 정리" << std::endl;
+  }
 }
 
 void cd_user::check() {

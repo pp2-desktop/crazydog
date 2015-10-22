@@ -60,6 +60,34 @@ void cd_session::do_read_body() {
 			  });
 }
 
+
+void cd_session::do_write(int type, std::string packet) {
+
+  char data[cd_message::header_length + cd_message::max_body_length] = {0, };
+ int len = sizeof(int) *2 + packet.size();
+
+ std::memcpy(data, &len, sizeof(int));
+ std::memcpy(data+sizeof(int), &type, sizeof(int));
+ std::memcpy(data+(sizeof(int)*2), packet.c_str(), packet.size());
+
+ auto self(shared_from_this());
+ boost::asio::async_write(socket_,
+			  boost::asio::buffer(data,
+					      len),
+			  [this, self] (boost::system::error_code ec, std::size_t len)
+			  {
+			    if (!ec) {
+				std::cout << "[debug] 전송 완료" << std::endl;
+				std::cout << "[debug] 보낸 패킷 길이: " << len << std::endl;
+			      }
+			    else {
+				std::cout << "[error] 전송 실패" << std::endl;
+				self->destroy();
+				//room_.leave(shared_from_this());
+			      }
+			  });
+}
+
 /*
 std::pair<int, std::string> cd_session::do_read_packet(int len, char* buf) {
 

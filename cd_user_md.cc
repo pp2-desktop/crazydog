@@ -23,6 +23,7 @@ bool cd_user_md::disconnected(std::shared_ptr<cd_user> p) {
     std::cout << "[debug] 유저 삭제 성공" << std::endl;
   } else {
     std::cout << "[error] 유저 삭제 실패" << std::endl;
+    return false;
   }
 
   return true;

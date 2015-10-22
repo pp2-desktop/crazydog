@@ -42,39 +42,53 @@ private:
 #include <thread>
 #include <vector>
 #include <functional>
+#include <signal.h>
 #include "cd_server.hpp"
 #include "cd_handler.hpp"
+cd_server* s;
+void run_cd_server() {
+  //boost::asio::io_service io_service;
+  tcp::endpoint endpoint(tcp::v4(), 8080);
+  s = new cd_server(endpoint);
+
+  std::vector<std::thread> workers;
+
+  for (int j = 0; j < 8; ++j) {
+    workers.push_back(std::thread([&]() {
+	  std::cout << "j: " << j << std::endl;
+	  s->io_service_.run();
+	}));
+  }
+  for(std::thread& t : workers) {
+    t.join();
+  }
+
+  delete s;
+}
+
+void sigint(int a) {
+  std::cout << "signal" << std::endl;
+  s->io_service_.stop();
+}
 
 int main(int argc, char* argv[])
 {
   try
   {
-    boost::asio::io_service io_service;
-    tcp::endpoint endpoint(tcp::v4(), 8080);
     std::cout << " aaa" << std::endl;
     if(!cd_handler::instance().init()) {
       std::cout << "[error] cd_handler init 실패" << std::endl;
       return 1;
     }
-    cd_server* s = new cd_server(io_service, endpoint);
-
-    std::vector<std::thread> workers;
-
-    for (int j = 0; j < 8; ++j) {
-      workers.push_back(std::thread([&]() {
-	    std::cout << "j: " << j << std::endl;
-	    io_service.run();
-	  }));
-    }
-    for(std::thread& t : workers) {
-      t.join();
-    }
- //std::bind(&boost::asio::io_service::run, &io_service);
-
-
+   
+//boost::asio::io_service io_service;
+    std::thread t(run_cd_server);
     
-    io_service.run();
-    delete s;
+    signal(SIGINT, sigint);
+
+
+    t.join();
+
     std::cout << " bbb" << std::endl;
   }
   catch (std::exception& e)

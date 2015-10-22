@@ -20,7 +20,7 @@ class cd_session
   : public std::enable_shared_from_this<cd_session> {
 
 public:
-  cd_session(boost::asio::io_service& io_service) : socket_(io_service) {
+  cd_session(boost::asio::io_service& io_service) : socket_(io_service), io_service_(io_service) {
     std::cout << "cd_session called" << std::endl;
   }
 
@@ -47,9 +47,11 @@ public:
   virtual void check()=0;
   virtual bool handle(int type, std::string packet)=0;
 
+  void do_write(int type, std::string packet);
 private:
   void do_read_header();
   void do_read_body();
+
   //std::pair<int, std::string> do_read_packet(int len, char* buf);
   /*
   void do_write()
@@ -80,6 +82,7 @@ public:
 //chat_room& room_;
   cd_message read_msg_;
   std::string name;
+  boost::asio::io_service& io_service_;
 //chat_message_queue write_msgs_;
 };
 
