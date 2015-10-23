@@ -2,6 +2,7 @@
 #define CD_USER_MD_HPP
 
 #include <map>
+#include <mutex>
 #include "cd_user.hpp"
 
 class cd_user_md {
@@ -18,7 +19,9 @@ public:
 
   }
 
+private:
   std::map<cd_user*, cd_user_ptr> m;
+  std::mutex mu;
 };
 
 #endif

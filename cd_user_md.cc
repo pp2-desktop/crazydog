@@ -3,7 +3,7 @@
 #include "cd_user_md.hpp"
 
 bool cd_user_md::connected(std::shared_ptr<cd_user> p) {
-  
+  std::lock_guard<std::mutex> lock(mu);
   bool r = m.insert(std::make_pair(p.get(), p)).second;
   if(r) {
     std::cout << "[debug] 유저 삽입 성공" << std::endl;
@@ -16,6 +16,7 @@ bool cd_user_md::connected(std::shared_ptr<cd_user> p) {
 }
 
 bool cd_user_md::disconnected(std::shared_ptr<cd_user> p) {
+  std::lock_guard<std::mutex> lock(mu);
   p->check();
 
   bool r = m.erase(p.get());

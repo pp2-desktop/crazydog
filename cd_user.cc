@@ -17,14 +17,15 @@ void cd_user::destroy() {
 
   auto self(std::dynamic_pointer_cast<cd_user>(shared_from_this()));
 
-  boost::system::error_code ec;
-  socket_.shutdown(boost::asio::socket_base::shutdown_both, ec);
-  socket_.close(ec);
-
+  
   bool r = cd_user_md::instance().disconnected(self);
   if(r) {
+    boost::system::error_code ec;
+    socket_.shutdown(boost::asio::socket_base::shutdown_both, ec);
+    socket_.close(ec);
     std::cout << "[debug] 유저 삭제에 관련해서 나머지 정리" << std::endl;
   }
+
 }
 
 void cd_user::check() {
